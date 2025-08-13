@@ -1,0 +1,13 @@
+{
+  "name": "infoseeker.ai.teamboyzian",
+  "version": "1.0.0",
+  "description": "InfoSeeker | Ask, Search & Learn",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
