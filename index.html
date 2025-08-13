@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Boyzian AI Hub</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Favicon (Online) -->
+<link id="dynamic-favicon" rel="icon" href="https://i.postimg.cc/TPH2MfpT/Screenshot-2025-07-16-23-28-33-759-com-whatsapp-w4b-edit.jpg" type="image/png">
+</head>
+<body>
+  <div class="bg-container"></div>
+
+  <div class="main-container glass">
+    <img src="https://i.postimg.cc/TPH2MfpT/Screenshot-2025-07-16-23-28-33-759-com-whatsapp-w4b-edit.jpg" alt="Team Boyzian" class="logo animate-logo">
+    <h1 class="title animate-title">Team Boyzian AI Hub</h1>
+    <p class="subtitle">Educational + Recent Info | Bangla & English</p>
+
+    <div class="qa-container">
+      <textarea id="question" placeholder="Type your question in Bangla or English..."></textarea>
+      <button id="askBtn" class="btn">Ask AI</button>
+    </div>
+
+    <div class="answer-container glass hidden" id="answerBox">
+      <div id="answerText" class="answer-text"></div>
+      <div class="meta-info">
+        <span id="confidence">Confidence: N/A</span>
+        <span id="recency">Recent Info: N/A</span>
+      </div>
+      <ul id="citations" class="citations-list"></ul>
+    </div>
+  </div>
+
+<script>
+  // Glowing Page Title
+  const originalTitle = document.title;
+  const glowChars = ['✨','💡','🌟','⚡'];
+  let glowIndex = 0;
+  setInterval(() => {
+    document.title = glowChars[glowIndex] + " " + originalTitle;
+    glowIndex = (glowIndex + 1) % glowChars.length;
+  }, 1000);
+
+  const askBtn = document.getElementById('askBtn');
+  const questionInput = document.getElementById('question');
+  const answerBox = document.getElementById('answerBox');
+  const answerText = document.getElementById('answerText');
+  const confidenceEl = document.getElementById('confidence');
+  const recencyEl = document.getElementById('recency');
+  const citationsEl = document.getElementById('citations');
+
+  askBtn.addEventListener('click', async () => {
+    const q = questionInput.value.trim();
+    if(!q) return alert("Please type a question.");
+
+    answerBox.classList.remove("hidden");
+    answerText.textContent = "Loading...";
+    confidenceEl.textContent = "Confidence: N/A";
+    recencyEl.textContent = "Recent Info: N/A";
+    citationsEl.innerHTML = "";
+
+    try {
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q, mode: "auto", maxDocs: 5 })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || "Something went wrong.");
+
+      answerText.textContent = "";
+      const text = data.answer || "No answer found.";
+      let i = 0;
+      const interval = setInterval(() => {
+        if(i >= text.length) clearInterval(interval);
+        answerText.textContent += text[i];
+        i++;
+      }, 20);
+
+      confidenceEl.textContent = "Confidence: " + (data.confidence*100).toFixed(0) + "%";
+      recencyEl.textContent = "Recent Info: " + (data.recency ? "Yes" : "No");
+
+      if(data.citations && data.citations.length){
+        citationsEl.innerHTML = data.citations.map(c => 
+          `<li><a href="${c.url}" target="_blank">${c.title}</a> [${c.id}]</li>`).join("");
+      }
+    } catch(err){
+      answerText.textContent = "Error: " + err.message;
+    }
+  });
+</script>
+</body>
+</html>
