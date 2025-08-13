@@ -1,0 +1,7 @@
+here# Ignore environment files
+.env
+
+# Node / Vercel stuff (optional)
+node_modules/
+dist/
+build/
